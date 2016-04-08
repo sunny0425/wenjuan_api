@@ -25,15 +25,12 @@ class WenjuanApi
       railse 'wenjuan api config site is none, Manybe you need init first'
     end
 
-    if(@site == '' || @site == null){
-        throw  new Error('config.site is null,Maybe you need init wenjuan');
-    }
     opts[:site] = @site
 
     # 按参数字母顺序升序排列
     querys = opts.sort.to_h
 
-    source = querys.values.join('')+@secret_key
+    source = querys.values.join('') + @secret_key
     
     opts[:md5] =  Digest::MD5.hexdigest(source+@secret_key);
     return opts
@@ -159,7 +156,6 @@ class WenjuanApi
     }
 
     get('/openapi/detail_list', opts)
-
   end
 
 
