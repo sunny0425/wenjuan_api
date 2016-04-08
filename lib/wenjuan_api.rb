@@ -4,21 +4,17 @@ require 'digest/md5'
 module WenjuanApi
   include HTTParty
 
-  def self.config
-    return config unless config.nil?
-    config ||= loading_config!
-    config
-  end
-
-  def initialize
-    @config = self.class.config
+  def config
+    return @config unless @config.nil?
+    @config ||= loading_config!
     @site = @config.site
     @secret_key = @config.secret_key
+    return @config
   end
 
   def get_md5(opts)
     if @site.blank?
-      railse 'wenjuan api config site is none, Manybe you need init first'
+      raise 'wenjuan api config site is none, Manybe you need init first'
     end
 
     opts[:site] = @site
@@ -160,14 +156,14 @@ module WenjuanApi
     self.class.get(@config.api_url + path, { query: opts })
   end
 
-  def self.loading_config!
+  def loading_config!
     config ||= config_from_file
     # @config.timeout ||= 20
     config.symbolize_keys!
     config = OpenStruct.new(config)
   end
 
-  def self.config_from_file
+  def config_from_file
     if defined?(::Rails)
       config_file = Rails.root.join('config/wenjuan_api.yml')
       return YAML.load(ERB.new(File.read(config_file)).result)[Rails.env] if File.exist?(config_file)
