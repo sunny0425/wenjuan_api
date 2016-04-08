@@ -1,23 +1,19 @@
-require 'wenjuan_api/loader'
 require 'digest/md5'
 
 # 问卷网文档：https://www.wenjuan.com/open/devmanual
-class WenjuanApi
+module WenjuanApi
   include HTTParty
 
   def self.config
-    Loader.config
+    return config unless config.nil?
+    config ||= loading_config!
+    config
   end
 
-  def base_uri
-    config[:api_url]
-  end
-
-  def initialize(config)
-    @config = config
-    @site = config[:site]
-    @secret_key = config[:secret_key]
-
+  def initialize
+    @config = self.class.config
+    @site = @config.site
+    @secret_key = @config.secret_key
   end
 
   def get_md5(opts)
@@ -51,7 +47,7 @@ class WenjuanApi
     }
     opts = get_md5(opts)
 
-    login_url = config[:api_url] + '?' + opts.to_query
+    login_url = @config.api_url + '/openapi/login/?' + opts.to_query
   end
 
   # site  String  网站编号，由问卷网分配 必须
@@ -82,7 +78,7 @@ class WenjuanApi
   # test  String  如果test=1, 那么为答卷预览 可选
   def project_url(opts)
     opts = get_md5(opts)
-    login_url = config[:api_url] + '/s/proj_id/?' + opts.to_query
+    login_url = @config.api_url + '/s/proj_id/?' + opts.to_query
   end
 
   def project_chart(user, proj_id)
@@ -158,11 +154,38 @@ class WenjuanApi
     get('/openapi/detail_list', opts)
   end
 
-
-
   private
   def get(path, opts)
     opts = get_md5(opts)
-    self.class.get(config[:api_url] + path, { query: opts })
+    self.class.get(@config.api_url + path, { query: opts })
   end
+
+  def self.loading_config!
+    config ||= config_from_file
+    # @config.timeout ||= 20
+    config.symbolize_keys!
+    config = OpenStruct.new(config)
+  end
+
+  def self.config_from_file
+    if defined?(::Rails)
+      config_file = Rails.root.join('config/wenjuan_api.yml')
+      return YAML.load(ERB.new(File.read(config_file)).result)[Rails.env] if File.exist?(config_file)
+    else
+      rails_config_file = File.join(Dir.getwd, 'config/wenjuan_api.yml')
+      home_config_file = File.join(Dir.home, '.wenjuan_api.yml')
+      if File.exist?(rails_config_file)
+        rails_env = ENV['RAILS_ENV'] || 'default'
+        config = YAML.load(ERB.new(File.read(rails_config_file)).result)[rails_env]
+        if config.present? && (config['site'] || config['secret_key'])
+          puts "Using rails project config/wenjuan_api.yml #{rails_env} setting..."
+          return config
+        end
+      end
+      if File.exist?(home_config_file)
+        return YAML.load ERB.new(File.read(home_config_file)).result
+      end
+    end
+  end
+
 end

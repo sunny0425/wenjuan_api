@@ -1,4 +1,4 @@
-module Wechat
+module WenjuanApi
   module Generators
     class InstallGenerator < Rails::Generators::Base
       desc 'Install Wenjuan api support files'
