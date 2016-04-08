@@ -4,9 +4,11 @@ $ rails generate wenjuan_api:install
 
 2. In rails console:
 
-> include WenjuanApi
+```ruby
+include WenjuanApi
 
-> WenjuanApi.config
+WenjuanApi.config
 
-> WenjuanApi.get_login_url('user', 'nickname', 'email')
+WenjuanApi.get_login_url('user', 'nickname', 'email')
 
+```
