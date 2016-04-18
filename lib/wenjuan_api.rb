@@ -21,11 +21,24 @@ module WenjuanApi
 
     # 按参数字母顺序升序排列
     querys = opts.sort.to_h
-
     source = querys.values.join('') + @secret_key
     
-    opts[:md5] =  Digest::MD5.hexdigest(source+@secret_key);
+    opts[:md5] =  Digest::MD5.hexdigest(source)
     return opts
+  end
+
+  def test_md5(opts)
+    # res = custom_get('/openapi/testmd5/', opts)
+    
+    opts = get_md5(opts)
+    res = HTTParty.get(@config.api_url + '/openapi/testmd5/', { query: opts })
+
+    our_md5 = opts[:md5]
+    if res.match(our_md5)
+      return { result: true, md5: our_md5 }
+    else
+      return { result: false, message: res.body, our_md5: our_md5 }
+    end
   end
 
   def get_login_url(user, nickname, email)
@@ -53,17 +66,17 @@ module WenjuanApi
   # num String  每页包含多少条目,默认20条  可选
   # status  String  问卷状态
   def projects(opts)
-    get('/openapi/proj_list/', opts )
+    custom_get('/openapi/proj_list/', opts )
   end
 
   def project_status(proj_id)
     opts = { proj_id: proj_id }
-    get('/openapi/proj_status/', opts )
+    custom_get('/openapi/proj_status/', opts )
   end
 
   def project_detail(proj_id)
     opts = { proj_id: proj_id }
-    get('/openapi/proj_detail/', opts)
+    custom_get('/openapi/proj_detail/', opts)
   end
 
   # proj_id String  项目ID  必须
@@ -83,7 +96,7 @@ module WenjuanApi
       proj_id: proj_id
     }
 
-    get('/openapi/basic_chart/', opts)
+    custom_get('/openapi/basic_chart/', opts)
   end
 
   # user  String  用户编号  必须
@@ -98,7 +111,7 @@ module WenjuanApi
       datatype: datatype
     }
 
-    get('/openapi/detail', opts)
+    custom_get('/openapi/detail', opts)
   end
 
   def create_project(user, type)
@@ -107,7 +120,7 @@ module WenjuanApi
       type: type
     }
 
-    get('/openapi/create', opts)
+    custom_get('/openapi/create', opts)
   end
 
   def delete_project(user, proj_id)
@@ -116,7 +129,7 @@ module WenjuanApi
       proj_id: proj_id
     }
 
-    get('/openapi/delete', opts)
+    custom_get('/openapi/delete', opts)
   end
 
   def change_project_status(user, proj_id, tostatus)
@@ -126,7 +139,7 @@ module WenjuanApi
       tostatus: tostatus
     }
 
-    get('/openapi/changestatus', opts)
+    custom_get('/openapi/changestatus', opts)
   end
 
   def copy_project(fromuser, proj_id, touser)
@@ -136,7 +149,7 @@ module WenjuanApi
       touser: touser
     }
 
-    get('/openapi/copy', opts)
+    custom_get('/openapi/copy', opts)
   end
 
   def project_detail_list(user, proj_id, begin_seq=1, length=50)
@@ -147,13 +160,13 @@ module WenjuanApi
       length: length
     }
 
-    get('/openapi/detail_list', opts)
+    custom_get('/openapi/detail_list', opts)
   end
 
   private
-  def get(path, opts)
+  def custom_get(path, opts)
     opts = get_md5(opts)
-    self.class.get(@config.api_url + path, { query: opts })
+    res = HTTParty.get(@config.api_url + path, { query: opts })
   end
 
   def loading_config!

@@ -12,3 +12,8 @@ WenjuanApi.config
 WenjuanApi.get_login_url('user', 'nickname', 'email')
 
 ```
+
+3. test md5
+```ruby
+WenjuanApi.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
+```
