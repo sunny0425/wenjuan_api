@@ -2,7 +2,9 @@
 
 1. add config file:
 
+```shell
 $ rails generate wenjuan_api:install
+```
 
 2. In rails console:
 
