@@ -1,10 +1,12 @@
 require 'digest/md5'
 
 # 问卷网文档：https://www.wenjuan.com/open/devmanual
-module WenjuanApi
+class WenjuanApi
   include HTTParty
 
-  def config
+  attr_accessor :site, :config  
+
+  def initialize
     return @config unless @config.nil?
     @config ||= loading_config!
     @site = @config.site
@@ -196,5 +198,4 @@ module WenjuanApi
       end
     end
   end
-
 end

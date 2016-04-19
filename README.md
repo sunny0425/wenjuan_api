@@ -9,16 +9,14 @@ $ rails generate wenjuan_api:install
 ## In rails console:
 
 ```ruby
-include WenjuanApi
+wenjuan_api = WenjuanApi.new
 
-WenjuanApi.config
-
-WenjuanApi.get_login_url('user', 'nickname', 'email')
+wenjuan_api.get_login_url('user', 'nickname', 'email')
 
 ```
 
 ## test md5
 
 ```ruby
-WenjuanApi.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
+wenjuan_api.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
 ```
