@@ -89,7 +89,7 @@ class WenjuanApi
   # test  String  如果test=1, 那么为答卷预览 可选
   def project_url(opts)
     opts = get_md5(opts)
-    login_url = @config.api_url + '/s/proj_id/?' + opts.to_query
+    login_url = @config.api_url + "/s/#{opts[:proj_id]}/?" + opts.to_query
   end
 
   def project_chart(user, proj_id)
