@@ -1,5 +1,9 @@
 # wenjuan_api gem
 
+```shell
+gem install wenjuan_api
+```
+
 ## add config file:
 
 ```shell
@@ -20,3 +24,5 @@ wenjuan_api.get_login_url('user', 'nickname', 'email')
 ```ruby
 wenjuan_api.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
 ```
+
+
