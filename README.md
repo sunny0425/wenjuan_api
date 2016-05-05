@@ -1,4 +1,4 @@
-# wenjuan_api gem, not finished
+# wenjuan_api gem
 
 ## add config file:
 
