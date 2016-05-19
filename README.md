@@ -25,4 +25,8 @@ wenjuan_api.get_login_url('user', 'nickname', 'email')
 wenjuan_api.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
 ```
 
+## get report chart url
 
+```ruby
+wenjuan_api.project_chart_url('username', 'proj_id')
+```

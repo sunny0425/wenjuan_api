@@ -92,13 +92,16 @@ class WenjuanApi
     login_url = @config.api_url + "/s/#{opts[:proj_id]}/?" + opts.to_query
   end
 
-  def project_chart(user, proj_id)
+  def project_chart_url(user, proj_id)
     opts = {
       user: user,
       proj_id: proj_id
     }
 
-    custom_get('/openapi/basic_chart/', opts)
+    opts = get_md5(opts)
+    url = @config.api_url + "/openapi/basic_chart/?" + opts.to_query
+
+    return url
   end
 
   # user  String  用户编号  必须
