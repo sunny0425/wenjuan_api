@@ -30,3 +30,10 @@ wenjuan_api.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', 
 ```ruby
 wenjuan_api.project_chart_url('username', 'proj_id')
 ```
+
+## get project answer list
+
+```ruby
+results = wenjuan.project_detail_list('username', 'proj_id', seq, length)
+# Be careful, here the username should be the wenjuan account username, not answerer's user name.
+```ruby
