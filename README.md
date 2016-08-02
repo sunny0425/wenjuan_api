@@ -1,5 +1,9 @@
 # wenjuan_api gem
 
+https://www.wenjuan.com/open/devdocument_v3/?chapter=1_1
+
+Wenjuan API Version 3
+
 ```shell
 gem install wenjuan_api
 ```
@@ -15,25 +19,19 @@ $ rails generate wenjuan_api:install
 ```ruby
 wenjuan_api = WenjuanApi.new
 
-wenjuan_api.get_login_url('user', 'nickname', 'email')
+wenjuan_api.get_login_url('wj_user', 'wj_email')
 
-```
-
-## test md5
-
-```ruby
-wenjuan_api.test_md5(user: 'name', nickname: 'name', email: 'name@company.com', ctime: Time.now.strftime('%Y-%m-%d %H:%M'))
 ```
 
 ## get report chart url
 
 ```ruby
-wenjuan_api.project_chart_url('username', 'proj_id')
+wenjuan_api.project_chart_url('username', 'wj_short_id')
 ```
 
 ## get project answer list
 
 ```ruby
-results = wenjuan.project_detail_list('username', 'proj_id', seq, length)
+results = wenjuan.project_detail_list('username', 'wj_short_id')
 # Be careful, here the username should be the wenjuan account username, not answerer's user name.
 ```ruby

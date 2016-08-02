@@ -1,176 +1,134 @@
 require 'digest/md5'
 
-# 问卷网文档：https://www.wenjuan.com/open/devmanual
+# 问卷网文档：https://www.wenjuan.com/open/devdocument_v3/?chapter=1_1
 class WenjuanApi
   include HTTParty
 
-  attr_accessor :site, :config  
+  attr_accessor :wj_appkey, :config  
 
   def initialize
     return @config unless @config.nil?
     @config ||= loading_config!
-    @site = @config.site
+    @wj_appkey = @config.wj_appkey
     @secret_key = @config.secret_key
     return @config
   end
 
-  def get_md5(opts)
-    if @site.blank?
-      raise 'wenjuan api config site is none, Manybe you need init first'
+  def get_signature(opts)
+    if @wj_appkey.blank?
+      raise 'wenjuan api config wj_appkey is none, Manybe you need init first'
     end
 
-    opts[:site] = @site
+    opts[:wj_appkey] = @wj_appkey
+    opts[:wj_timestamp] = Time.now.to_i.to_s
 
     # 按参数字母顺序升序排列
     querys = opts.sort.to_h
     source = querys.values.join('') + @secret_key
     
-    opts[:md5] =  Digest::MD5.hexdigest(source)
+    opts[:wj_signature] =  Digest::MD5.hexdigest(source)
     return opts
   end
 
-  def test_md5(opts)
-    # res = custom_get('/openapi/testmd5/', opts)
-    
-    opts = get_md5(opts)
-    res = HTTParty.get(@config.api_url + '/openapi/testmd5/', { query: opts })
-
-    our_md5 = opts[:md5]
-    if res.match(our_md5)
-      return { result: true, md5: our_md5 }
-    else
-      return { result: false, message: res.body, our_md5: our_md5 }
-    end
-  end
-
-  def get_login_url(user, nickname, email)
-    # site  String  网站编号，由问卷网分配 必须
-    # user  String  用户编号,接入方用户的唯一标识 必须
-    # nickname  String  用户姓名或昵称, 将与唯一字段拼接， 作为问卷网登录名, 当昵称不存在时, 选用user拼接  可选
-    # ctime DateTime  登录时间戳 "yyyy-mm-dd HH:MM"  必须
-    # email String  用户邮件  必须
-    # mobile  String  用户手机号码  可选
+  def get_login_url(wj_user, wj_email)
     opts = {
-      user: user,
-      nickname: nickname,
-      email: email,
-      ctime: Time.now.strftime('%Y-%m-%d %H:%M')
+      wj_user: wj_user,
+      wj_email: wj_email
     }
-    opts = get_md5(opts)
+    opts = get_signature(opts)
 
-    login_url = @config.api_url + '/openapi/login/?' + opts.to_query
+    login_url = @config.api_url + '/openapi/v3/login/?' + opts.to_query
   end
 
-  # site  String  网站编号，由问卷网分配 必须
-  # user  String  用户编号  可选
-  # type  String  项目类型(form或survey, 默认全部) 可选
-  # page  String  查看第几页, 如果不带page参数，则返回所有项目列表 可选
-  # num String  每页包含多少条目,默认20条  可选
-  # status  String  问卷状态
   def projects(opts)
-    custom_get('/openapi/proj_list/', opts )
+    custom_get('/openapi/v3/get_proj_list/', opts )
   end
 
-  def project_status(proj_id)
-    opts = { proj_id: proj_id }
-    custom_get('/openapi/proj_status/', opts )
+  def project_status(wj_short_id)
+    opts = { 
+      wj_short_id: wj_short_id
+    }
+    custom_get('/openapi/v3/get_proj_status/', opts )
   end
 
-  def project_detail(proj_id)
-    opts = { proj_id: proj_id }
-    custom_get('/openapi/proj_detail/', opts)
+  def project_detail(wj_short_id)
+    opts = { 
+      wj_short_id: wj_short_id
+    }
+    custom_get('/openapi/v3/get_proj_detail/', opts)
   end
 
-  # proj_id String  项目ID  必须
-  # user  String  答题者编号 必须
-  # repeat  String  同一答题者可重复答题  可选（1-可重复答题）
-  # callback  String  回调地址,需要escape转义,计算md5时使用未转义的callback字符串 可选
-  # redirect_uri  String  答题重定向地址,需要escape转义,计算md5时使用未转义的redirect_uri字符串  可选
-  # test  String  如果test=1, 那么为答卷预览 可选
   def project_url(opts)
-    opts = get_md5(opts)
-    login_url = @config.api_url + "/s/#{opts[:proj_id]}/?" + opts.to_query
+    opts = get_signature(opts)
+    login_url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + opts.to_query
   end
 
-  def project_chart_url(user, proj_id)
+  def project_chart_url(wj_user, wj_short_id)
     opts = {
-      user: user,
-      proj_id: proj_id
+      wj_user: wj_user,
+      wj_short_id: wj_short_id
     }
 
-    opts = get_md5(opts)
-    url = @config.api_url + "/openapi/basic_chart/?" + opts.to_query
+    opts = get_signature(opts)
+    url = @config.api_url + "/openapi/v3/get_basic_chart/?" + opts.to_query
 
     return url
   end
 
-  # user  String  用户编号  必须
-  # proj_id String  项目ID  必须
-  # respondent  String  答题者编号 必须
-  # datatype  String  返回数据类型(json或html, 默认html) 可选
-  def user_project_latest_result(user, proj_id, respondent, datatype='html')
+  def user_project_latest_result(wj_user, wj_short_id, wj_respondent, wj_datatype='html')
     opts = {
-      user: user,
-      proj_id: proj_id,
-      respondent: respondent,
-      datatype: datatype
+      wj_user: wj_user,
+      wj_short_id: wj_short_id,
+      wj_respondent: wj_respondent,
+      wj_datatype: wj_datatype
     }
 
-    custom_get('/openapi/detail', opts)
+    custom_get('/openapi/v3/get_rspd_detail/', opts)
   end
 
-  def create_project(user, type)
+  def create_project(wj_user, wj_ptype, wj_callback)
     opts = {
-      user: user,
-      type: type
+      wj_user: wj_user,
+      wj_ptype: wj_ptype,
+      wj_callback: wj_callback
     }
 
-    custom_get('/openapi/create', opts)
+    custom_get('/openapi/v3/create_proj/', opts)
   end
 
-  def delete_project(user, proj_id)
+  def change_project_status(wj_user, wj_short_id, wj_tostatus)
     opts = {
-      user: user,
-      proj_id: proj_id
+      wj_user: wj_user,
+      wj_short_id: wj_short_id,
+      wj_tostatus: wj_tostatus
     }
 
-    custom_get('/openapi/delete', opts)
+    custom_get('/openapi/v3/change_proj_status/', opts)
   end
 
-  def change_project_status(user, proj_id, tostatus)
+  def copy_project(wj_from_user, wj_short_id, wj_to_user, wj_title= nil)
     opts = {
-      user: user,
-      proj_id: proj_id,
-      tostatus: tostatus
+      wj_from_user: wj_from_user,
+      wj_short_id: wj_short_id,
+      wj_to_user: wj_to_user
     }
+    
+    opts[:wj_title] = wj_title if wj_title.present?
 
-    custom_get('/openapi/changestatus', opts)
+    custom_get('/openapi/v3/copy_proj/', opts)
   end
 
-  def copy_project(fromuser, proj_id, touser)
+  def project_detail_list(wj_user, proj_id, more_opts={})
     opts = {
-      fromuser: fromuser,
-      proj_id: proj_id,
-      touser: touser
-    }
+      wj_user: wj_user,
+    }.merge(more_opts)
 
-    custom_get('/openapi/copy', opts)
-  end
-
-  def project_detail_list(user, proj_id, begin_seq=1, length=50)
-    opts = {
-      user: user,
-      proj_id: proj_id,
-      begin_seq: begin_seq,
-      length: length
-    }
-
-    custom_get('/openapi/detail_list', opts)
+    custom_get('/openapi/v3/get_proj_list/', opts)
   end
 
   private
   def custom_get(path, opts)
-    opts = get_md5(opts)
+    opts = get_signature(opts)
     res = HTTParty.get(@config.api_url + path, { query: opts })
   end
 
@@ -191,7 +149,7 @@ class WenjuanApi
       if File.exist?(rails_config_file)
         rails_env = ENV['RAILS_ENV'] || 'default'
         config = YAML.load(ERB.new(File.read(rails_config_file)).result)[rails_env]
-        if config.present? && (config['site'] || config['secret_key'])
+        if config.present? && (config['wj_appkey'] || config['secret_key'])
           puts "Using rails project config/wenjuan_api.yml #{rails_env} setting..."
           return config
         end

@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'wenjuan_api'
-  s.version     = '0.0.1'
-  s.date        = '2016-04-07'
+  s.version     = '0.0.2'
+  s.date        = '2016-08-02'
   s.summary     = 'Wenjuan Api'
   s.description = 'Wenjuan Api integration gem'
   s.authors     = ['luoping']
