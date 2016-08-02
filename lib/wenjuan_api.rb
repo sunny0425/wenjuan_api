@@ -14,13 +14,13 @@ class WenjuanApi
     return @config
   end
 
-  def get_signature(opts)
+  def get_signature(opts, with_signature=true)
     if @wj_appkey.blank?
       raise 'wenjuan api config wj_appkey is none, Manybe you need init first'
     end
 
     opts[:wj_appkey] = @wj_appkey
-    opts[:wj_timestamp] = Time.now.to_i.to_s
+    opts[:wj_timestamp] = Time.now.to_i.to_s if with_signature
 
     # 按参数字母顺序升序排列
     querys = opts.sort.to_h
@@ -59,8 +59,9 @@ class WenjuanApi
   end
 
   def project_url(opts)
-    opts = get_signature(opts)
-    login_url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + opts.to_query
+    opts = get_signature(opts, false)
+
+    _url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + URI.unescape(opts.to_query)
   end
 
   def project_chart_url(wj_user, wj_short_id)
