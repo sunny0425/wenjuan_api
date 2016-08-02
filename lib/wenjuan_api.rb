@@ -118,12 +118,13 @@ class WenjuanApi
     custom_get('/openapi/v3/copy_proj/', opts)
   end
 
-  def project_detail_list(wj_user, proj_id, more_opts={})
+  def project_detail_list(wj_user, wj_short_id, more_opts={})
     opts = {
       wj_user: wj_user,
+      wj_short_id: wj_short_id,
     }.merge(more_opts)
 
-    custom_get('/openapi/v3/get_proj_list/', opts)
+    custom_get('/openapi/v3/get_rspd_detail_list/', opts)
   end
 
   private
