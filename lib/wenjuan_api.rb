@@ -76,6 +76,18 @@ class WenjuanApi
     return url
   end
 
+  def project_report_chart(wj_user, wj_short_id)
+    opts = {
+      wj_user: wj_user,
+      wj_short_id: wj_short_id
+    }
+
+    opts = get_signature(opts)
+    url = @config.api_url + "/openapi/v3/get_report_chart/?" + opts.to_query
+
+    return url
+  end
+
   def user_project_latest_result(wj_user, wj_short_id, wj_respondent, wj_datatype='html')
     opts = {
       wj_user: wj_user,
