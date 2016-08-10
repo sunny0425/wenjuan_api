@@ -61,7 +61,7 @@ class WenjuanApi
   def project_url(opts)
     opts = get_signature(opts, false)
 
-    _url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + URI.unescape(opts.to_query)
+    _url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + opts.to_query
   end
 
   def project_chart_url(wj_user, wj_short_id)
