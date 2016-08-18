@@ -14,7 +14,22 @@ class WenjuanApi
     return @config
   end
 
-  def get_signature(opts, with_signature=true)
+  # 核对答题状态回调时的signature
+  # NOTICE: signature do not need appkey
+  def check_callback_signature(opts)
+    querys = opts.with_indifferent_access
+    wj_signature = querys.delete('wj_signature')
+
+    source = querys.sort.to_h.values.join('') + @secret_key
+
+    _md5 = Digest::MD5.hexdigest(source)
+    p ' **' * 20
+    p _md5
+
+    return wj_signature == _md5
+  end
+
+  def with_signature(opts, with_signature=true)
     if @wj_appkey.blank?
       raise 'wenjuan api config wj_appkey is none, Manybe you need init first'
     end
@@ -26,7 +41,7 @@ class WenjuanApi
     querys = opts.sort.to_h
     source = querys.values.join('') + @secret_key
     
-    opts[:wj_signature] =  Digest::MD5.hexdigest(source)
+    opts[:wj_signature] = Digest::MD5.hexdigest(source)
     return opts
   end
 
@@ -35,7 +50,7 @@ class WenjuanApi
       wj_user: wj_user,
       wj_email: wj_email
     }
-    opts = get_signature(opts)
+    opts = with_signature(opts)
 
     login_url = @config.api_url + '/openapi/v3/login/?' + opts.to_query
   end
@@ -59,7 +74,7 @@ class WenjuanApi
   end
 
   def project_url(opts)
-    opts = get_signature(opts, false)
+    opts = with_signature(opts, false)
 
     _url = @config.api_url + "/s/#{opts[:wj_short_id]}/?" + opts.to_query
   end
@@ -70,7 +85,7 @@ class WenjuanApi
       wj_short_id: wj_short_id
     }
 
-    opts = get_signature(opts)
+    opts = with_signature(opts)
     url = @config.api_url + "/openapi/v3/get_basic_chart/?" + opts.to_query
 
     return url
@@ -82,7 +97,7 @@ class WenjuanApi
       wj_short_id: wj_short_id
     }
 
-    opts = get_signature(opts)
+    opts = with_signature(opts)
     url = @config.api_url + "/openapi/v3/get_report_chart/?" + opts.to_query
 
     return url
@@ -142,7 +157,7 @@ class WenjuanApi
 
   private
   def custom_get(path, opts)
-    opts = get_signature(opts)
+    opts = with_signature(opts)
     res = HTTParty.get(@config.api_url + path, { query: opts })
   end
 
